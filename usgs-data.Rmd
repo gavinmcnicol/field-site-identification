@@ -17,3 +17,154 @@ library(tidyverse)
 library(waterData)
 ```
 
+Get help page for the `importDVs` function:
+
+```{r}
+??importDVs
+```
+
+The format is: `importDVs(staid, code = "00060", stat = "00003", sdate = "1851-01-01", edate = as.Date(Sys.Date(), format = "%Y-%m-%d"))`
+  
+Note that:
+    - Code **00060**: stream flow in cubic feet per second
+    - Stat **00003**: mean, for mean daily stream flow
+
+## Blackberry Creek USGS Stream Data
+
+1. **Blackberry Creek**
+    + Station 1: "Jericho Lake"
+
+```{r}
+jericho <- importDVs( "05551675" , code = "00060", stat = "00003", sdate = "1851-01-01",
+  edate = as.Date(Sys.Date(), format = "%Y-%m-%d"))
+str(jericho)
+```
+
+Try plotting all the data:
+
+```{r}
+jericho %>% 
+  ggplot(aes(dates, val, color = qualcode)) + 
+  geom_line() +
+  labs(x = "Year", y = "Stream Flow (cubic ft per s)") +
+  theme_classic()
+```
+
+The record runs from 1998 to present and almost all the data got the best quality flag. Only 10 missing values.
+
+Does stream flow go to zero in winter? Let's look at the last year of winter data (Dec - March 2019-2020).
+
+```{r}
+jericho_winter <- importDVs( "05551675" , code = "00060", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(jericho_winter)
+```
+
+```{r}
+jericho_winter %>% 
+  ggplot(aes(dates, val, color = qualcode)) + 
+  geom_line() +
+  labs(x = "Year", y = "Stream Flow (cubic ft per s)") +
+  theme_classic()
+```
+
+It appears some amount of flow continues during the winter.
+
+Let's check the **water temperature** values to see if it was every subzero (when you might expect no flow).
+
+```{r}
+jericho_winter_temps <- importDVs( "05551675" , code = "00010", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(jericho_winter_temps)
+```
+
+Looks like *water temperatures are not available* at Jericho. What about **dissolved O2**?
+
+```{r}
+jericho_winter_o2 <- importDVs( "05551675" , code = "00300", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(jericho_winter_o2)
+```
+
+Nope, it appears it's only stream flow and gage height (stage, in feet). This was actually mentioned in the USGS station information. 
+
+1. **Blackberry Creek**
+    + Station 2: "N Yorkville"
+
+```{r}
+yorkville <- importDVs( "05551700" , code = "00060", stat = "00003", sdate = "1851-01-01",
+  edate = as.Date(Sys.Date(), format = "%Y-%m-%d"))
+str(yorkville)
+```
+
+Try plotting:
+
+```{r}
+yorkville %>% 
+  ggplot(aes(dates, val, color = qualcode)) + 
+  geom_line() +
+  labs(x = "Year", y = "Stream Flow (cubic ft per s)") +
+  theme_classic()
+```
+
+This record is much longer. 1960-present. It captures a large flood in the late 1990s. Almost all the data also got the highest quality flag. Only 6 missing values.
+
+Let's ask the same questions at Yorkville.
+Does stream flow go to zero in winter? Let's look at the last year of winter data (Dec - March 2019-2020).
+
+```{r}
+yorkville_winter <- importDVs( "05551700" , code = "00060", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(yorkville_winter)
+```
+
+```{r}
+yorkville_winter %>% 
+  ggplot(aes(dates, val, color = qualcode)) + 
+  geom_line() +
+  labs(x = "Year", y = "Stream Flow (cubic ft per s)") +
+  theme_classic()
+```
+
+It appears some amount of flow continues during the winter.
+
+Let's check the **water temperature** values to see if it was every subzero (when you might expect no flow).
+
+```{r}
+yorkville_winter_temps <- importDVs( "05551700" , code = "00010", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(yorkville_winter_temps)
+```
+
+Looks like *water temperatures are not available* at yorkville. What about **dissolved O2**?
+
+```{r}
+yorkville_winter_o2 <- importDVs( "05551700" , code = "00300", stat = "00003", sdate = "2019-12-01",
+  edate = as.Date("2020-03-31", format = "%Y-%m-%d"))
+str(yorkville_winter_o2)
+```
+
+Nope, it also appears it's only stream flow and gage height (stage, in feet). 
+
+## Blackberry Creek USGS Well Data
+
+There is one head water well with data from 2013-2016. Look at [this planning document](https://docs.google.com/document/d/1wwahbof9F4_AHNwjYMf4ATcnPpM91vaSCr03aHPOYDQ/edit#). It appears to show the water table rising above the surface by up to 1-2 ft in the winter and dropping in the summer. The summer water table for 2012 looks much lower than 2013. Check to see if the discharge data reflect this:
+
+```{r}
+yorkville <- importDVs( "05551700" , code = "00060", stat = "00003", sdate = "2012-01-01",
+  edate = as.Date("2015-12-31", format = "%Y-%m-%d"))
+str(yorkville)
+```
+
+Try plotting:
+
+```{r}
+yorkville %>% 
+  ggplot(aes(dates, val, color = qualcode)) + 
+  geom_line() +
+  labs(x = "Year", y = "Stream Flow (cubic ft per s)") +
+  theme_classic()
+````
+
+Yes, it appears 2012 had a much drier winter than 2013, 2014 or 2015. (Though we lack the corresponding water table data points for 2014 and 2015).
+
