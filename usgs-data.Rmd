@@ -1,0 +1,19 @@
+---
+title: "USGS Data"
+author: "Gavin McNicol"
+date: "2/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Exploring available USGS data (mostly water) for candidate McNicol Lab wetland / wet prairie field sites.
+
+First, load packages:
+```{r}
+library(tidyverse)
+library(waterData)
+```
+
